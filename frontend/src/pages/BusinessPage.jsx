@@ -5,11 +5,7 @@ import { useAuth } from '../AuthContext'
 import { useLive } from '../lib/useLive'
 import Layout from '../components/Layout'
 
-const input =
-  'rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500'
-const btn = 'rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 px-4 py-2 text-sm font-semibold'
-
-function ServiceRow({ service, isOwner, canManage, onChanged }) {
+function ServiceRow({ service, isOwner, canManage, canJoin, onChanged }) {
   const navigate = useNavigate()
   const [q, setQ] = useState(null)
   const [error, setError] = useState('')
@@ -39,33 +35,37 @@ function ServiceRow({ service, isOwner, canManage, onChanged }) {
   }
 
   return (
-    <div className="rounded-lg bg-slate-800 px-4 py-3">
-      <div className="flex items-center justify-between gap-3">
+    <div className="card p-4">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <p className="font-medium">
+          <p className="font-semibold">
             {service.name}
-            {!service.is_open && <span className="ml-2 text-xs text-red-400">closed</span>}
+            {!service.is_open && <span className="pill bg-red-100 text-red-700 ml-2">Closed</span>}
           </p>
-          <p className="text-xs text-slate-400">
-            ~{service.avg_service_minutes} min each
-            {q && ` · ${q.waiting} waiting · now serving ${q.now_serving ?? '—'}`}
-          </p>
+          <p className="text-xs text-muted mt-1">~{service.avg_service_minutes} min per person</p>
         </div>
         <div className="flex items-center gap-2">
-          {canManage && (
-            <Link to={`/manage/${service.id}`} className="text-sm text-indigo-400 hover:text-indigo-300">
-              Manage
-            </Link>
-          )}
+          {canManage && <Link to={`/manage/${service.id}`} className="btn btn-ghost btn-sm">Manage</Link>}
           {isOwner && (
-            <button onClick={toggleOpen} className="text-xs text-slate-400 hover:text-white">
+            <button onClick={toggleOpen} className="btn btn-ghost btn-sm">
               {service.is_open ? 'Close' : 'Open'}
             </button>
           )}
-          <button onClick={join} disabled={!service.is_open} className={btn}>Join queue</button>
+          {canJoin && (
+            <button onClick={join} disabled={!service.is_open} className="btn btn-accent btn-sm">
+              Join queue
+            </button>
+          )}
         </div>
       </div>
-      {error && <p className="text-red-400 text-xs mt-2">{error}</p>}
+
+      {q && (
+        <div className="flex gap-6 mt-3 pt-3 border-t border-dashed border-line text-sm">
+          <p><span className="font-mono font-bold text-lg">{q.waiting}</span> <span className="text-muted">waiting</span></p>
+          <p><span className="font-mono font-bold text-lg">{q.now_serving ?? '—'}</span> <span className="text-muted">now serving</span></p>
+        </div>
+      )}
+      {error && <p className="text-red-600 text-xs mt-2">{error}</p>}
     </div>
   )
 }
@@ -75,20 +75,23 @@ export default function BusinessPage() {
   const { profile } = useAuth()
   const [business, setBusiness] = useState(null)
   const [branches, setBranches] = useState([])
+  const [isStaff, setIsStaff] = useState(false)
   const [branchForm, setBranchForm] = useState({ name: '', address: '' })
   const [serviceForms, setServiceForms] = useState({})
   const [error, setError] = useState('')
 
   async function load() {
-    const [b, brs] = await Promise.all([
+    const [b, brs, staff] = await Promise.all([
       api(`/businesses/${id}`),
       api(`/businesses/${id}/branches`),
+      api(`/businesses/${id}/staff`).catch(() => []),
     ])
     const withServices = await Promise.all(
       brs.map(async (br) => ({ ...br, services: await api(`/branches/${br.id}/services`) }))
     )
     setBusiness(b)
     setBranches(withServices)
+    setIsStaff(staff.some((s) => s.user_id === profile.id))
   }
 
   useEffect(() => {
@@ -96,7 +99,7 @@ export default function BusinessPage() {
   }, [id])
 
   const isOwner = business && profile && business.owner_id === profile.id
-  const canManage = isOwner || profile?.role === 'staff'
+  const canManage = isOwner || isStaff
 
   async function addBranch(e) {
     e.preventDefault()
@@ -130,50 +133,62 @@ export default function BusinessPage() {
     setServiceForms({ ...serviceForms, [branchId]: { ...serviceForms[branchId], [k]: e.target.value } })
 
   if (!business) {
-    return <Layout><p className="text-slate-400">{error || 'Loading...'}</p></Layout>
+    return <Layout><p className="text-muted">{error || 'Loading...'}</p></Layout>
   }
 
   return (
     <Layout>
-      <Link to="/" className="text-sm text-slate-400 hover:text-white">← Back</Link>
-      <h1 className="text-2xl font-bold mt-2">{business.name}</h1>
-      {business.description && <p className="text-slate-400">{business.description}</p>}
-      {error && <p className="text-red-400 text-sm mt-3">{error}</p>}
+      <Link to="/" className="text-sm text-muted hover:text-ink">← All businesses</Link>
+      <h1 className="font-display font-extrabold text-4xl tracking-tight mt-2">{business.name}</h1>
+      {business.description && <p className="text-muted mt-1">{business.description}</p>}
+      {error && <p className="text-red-600 text-sm mt-3">{error}</p>}
 
-      <div className="mt-8 space-y-6">
+      <div className="mt-8 space-y-8">
         {branches.map((br) => (
           <section key={br.id}>
-            <h2 className="font-semibold">{br.name}</h2>
-            {br.address && <p className="text-sm text-slate-400 mb-3">{br.address}</p>}
+            <div className="mb-3">
+              <h2 className="font-display font-bold text-xl">{br.name}</h2>
+              {br.address && <p className="text-sm text-muted">📍 {br.address}</p>}
+            </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               {br.services.map((s) => (
-                <ServiceRow key={s.id} service={s} isOwner={isOwner} canManage={canManage} onChanged={load} />
+                <ServiceRow
+                  key={s.id}
+                  service={s}
+                  isOwner={isOwner}
+                  canManage={canManage}
+                  canJoin={!canManage}
+                  onChanged={load}
+                />
               ))}
-              {br.services.length === 0 && <p className="text-sm text-slate-500">No services yet.</p>}
+              {br.services.length === 0 && <p className="text-sm text-muted">No services yet.</p>}
             </div>
 
             {isOwner && (
-              <form onSubmit={(e) => addService(e, br.id)} className="flex gap-2 mt-3">
-                <input className={`${input} flex-1`} placeholder="New service" required
-                  value={serviceForms[br.id]?.name || ''} onChange={setSF(br.id, 'name')} />
-                <input className={`${input} w-24`} placeholder="Min" type="number" min="1"
-                  value={serviceForms[br.id]?.mins || ''} onChange={setSF(br.id, 'mins')} />
-                <button className={btn}>Add</button>
-              </form>
+              <details className="mt-3">
+                <summary className="text-sm font-semibold text-accent cursor-pointer select-none">+ Add service</summary>
+                <form onSubmit={(e) => addService(e, br.id)} className="flex gap-2 mt-3">
+                  <input className="field flex-1" placeholder="Service name" required
+                    value={serviceForms[br.id]?.name || ''} onChange={setSF(br.id, 'name')} />
+                  <input className="field w-24" placeholder="Min" type="number" min="1"
+                    value={serviceForms[br.id]?.mins || ''} onChange={setSF(br.id, 'mins')} />
+                  <button className="btn btn-accent">Add</button>
+                </form>
+              </details>
             )}
           </section>
         ))}
       </div>
 
       {isOwner && (
-        <form onSubmit={addBranch} className="mt-8 rounded-xl bg-slate-800/50 p-4 space-y-3">
-          <p className="text-sm font-semibold">Add branch</p>
-          <input className={`${input} w-full`} placeholder="Branch name" required
+        <form onSubmit={addBranch} className="card p-4 mt-10 space-y-3">
+          <p className="text-xs uppercase tracking-widest text-muted font-semibold">Add a branch</p>
+          <input className="field" placeholder="Branch name" required
             value={branchForm.name} onChange={(e) => setBranchForm({ ...branchForm, name: e.target.value })} />
-          <input className={`${input} w-full`} placeholder="Address"
+          <input className="field" placeholder="Address"
             value={branchForm.address} onChange={(e) => setBranchForm({ ...branchForm, address: e.target.value })} />
-          <button className={btn}>Add branch</button>
+          <button className="btn">Add branch</button>
         </form>
       )}
     </Layout>

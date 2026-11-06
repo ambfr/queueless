@@ -27,40 +27,37 @@ export default function AuthPage() {
     }
   }
 
-  const input =
-    'w-full rounded-lg bg-slate-800 border border-slate-700 px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500'
+  const tab = (m) =>
+    `rounded-lg py-2 transition ${mode === m ? 'bg-ink text-paper' : 'text-muted hover:text-ink'}`
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-900 px-4">
-      <form onSubmit={submit} className="w-full max-w-sm space-y-4">
-        <h1 className="text-3xl font-bold text-white text-center">QueueLess</h1>
-        <p className="text-slate-400 text-center text-sm">
-          {mode === 'login' ? 'Sign in to your account' : 'Create an account'}
-        </p>
+    <div className="min-h-screen grid place-items-center px-4">
+      <div className="w-full max-w-sm">
+        <div className="text-center mb-8">
+          <span className="inline-grid place-items-center size-12 rounded-2xl bg-accent text-white font-display font-extrabold text-2xl">Q</span>
+          <h1 className="font-display font-extrabold text-4xl tracking-tight mt-4">QueueLess</h1>
+          <p className="text-muted mt-1">Skip the line. Not the service.</p>
+        </div>
 
-        {mode === 'register' && (
-          <input className={input} placeholder="Full name" value={form.full_name} onChange={set('full_name')} />
-        )}
-        <input className={input} type="email" placeholder="Email" value={form.email} onChange={set('email')} required />
-        <input className={input} type="password" placeholder="Password (min 6)" value={form.password} onChange={set('password')} required />
+        <form onSubmit={submit} className="card p-6 space-y-3">
+          <div className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-paper border border-line text-sm font-semibold">
+            <button type="button" className={tab('login')} onClick={() => { setMode('login'); setError('') }}>Sign in</button>
+            <button type="button" className={tab('register')} onClick={() => { setMode('register'); setError('') }}>Sign up</button>
+          </div>
 
-        {error && <p className="text-red-400 text-sm">{error}</p>}
+          {mode === 'register' && (
+            <input className="field" placeholder="Full name" value={form.full_name} onChange={set('full_name')} />
+          )}
+          <input className="field" type="email" placeholder="Email" value={form.email} onChange={set('email')} required />
+          <input className="field" type="password" placeholder="Password (min 6)" value={form.password} onChange={set('password')} required />
 
-        <button
-          disabled={busy}
-          className="w-full rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 py-2.5 font-semibold text-white"
-        >
-          {busy ? 'Please wait...' : mode === 'login' ? 'Sign in' : 'Sign up'}
-        </button>
+          {error && <p className="text-red-600 text-sm">{error}</p>}
 
-        <button
-          type="button"
-          onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError('') }}
-          className="w-full text-sm text-slate-400 hover:text-white"
-        >
-          {mode === 'login' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
-        </button>
-      </form>
+          <button disabled={busy} className="btn btn-accent w-full py-3">
+            {busy ? 'Please wait...' : mode === 'login' ? 'Sign in' : 'Create account'}
+          </button>
+        </form>
+      </div>
     </div>
   )
 }

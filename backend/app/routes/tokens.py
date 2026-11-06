@@ -7,6 +7,44 @@ bp = Blueprint("tokens", __name__)
 IST = timezone(timedelta(hours=5, minutes=30))
 ACTIVE = ["waiting", "called", "serving"]
 
+def service_context(service_id):
+    sv = (
+        g.db.table("services")
+        .select("id, name, avg_service_minutes, is_open, branches(name, business_id, businesses(name))")
+        .eq("id", service_id).single().execute().data
+    )
+    br = sv.get("branches") or {}
+    biz = br.get("businesses") or {}
+    return {
+        "id": sv["id"],
+        "service_name": sv["name"],
+        "avg_service_minutes": sv["avg_service_minutes"],
+        "is_open": sv["is_open"],
+        "branch_name": br.get("name"),
+        "business_id": br.get("business_id"),
+        "business_name": biz.get("name"),
+    }
+
+
+def flatten_token(row):
+    sv = row.pop("services", None) or {}
+    br = sv.get("branches") or {}
+    biz = br.get("businesses") or {}
+    row["service_name"] = sv.get("name")
+    row["branch_name"] = br.get("name")
+    row["business_id"] = br.get("business_id")
+    row["business_name"] = biz.get("name")
+    return row
+
+
+@bp.get("/services/<service_id>")
+@auth_required
+def service_detail(service_id):
+    try:
+        return jsonify(service_context(service_id)), 200
+    except Exception:
+        return jsonify(error="Service not found"), 404
+
 
 def err(e, code=400):
     msg = getattr(e, "message", None) or str(e)
@@ -63,13 +101,14 @@ def call_next(service_id):
 @auth_required
 def my_tokens():
     res = (
-        g.db.table("tokens").select("*")
+        g.db.table("tokens")
+        .select("*, services(name, branches(name, business_id, businesses(name)))")
         .eq("customer_id", g.user.id)
         .in_("status", ACTIVE)
         .order("created_at", desc=True)
         .execute()
     )
-    return jsonify(res.data), 200
+    return jsonify([flatten_token(r) for r in res.data]), 200
 
 
 @bp.get("/tokens/<token_id>")
@@ -79,7 +118,14 @@ def token_info(token_id):
         res = g.db.rpc("token_info", {"p_token": token_id}).execute()
     except Exception as e:
         return err(e, 404)
-    return jsonify(res.data), 200
+    info = res.data
+    try:
+        ctx = service_context(info["service_id"])
+        for k in ("service_name", "branch_name", "business_id", "business_name"):
+            info[k] = ctx[k]
+    except Exception:
+        pass
+    return jsonify(info), 200
 
 
 @bp.post("/tokens/<token_id>/status")

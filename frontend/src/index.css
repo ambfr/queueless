@@ -1,1 +1,43 @@
 @import "tailwindcss";
+
+@theme {
+  --font-display: "Bricolage Grotesque", system-ui, sans-serif;
+  --font-sans: "DM Sans", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --color-paper: #f4efe4;
+  --color-card: #fffdf8;
+  --color-ink: #1a1712;
+  --color-muted: #7a7260;
+  --color-line: #e2dac6;
+  --color-accent: #ff5a1f;
+  --color-accent-dark: #e2480f;
+  --color-ok: #1f8a4c;
+}
+
+body {
+  @apply bg-paper text-ink font-sans antialiased;
+}
+
+@layer components {
+  .card {
+    @apply bg-card border border-line rounded-2xl;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-ink text-paper px-4 py-2.5 text-sm font-semibold cursor-pointer transition hover:bg-black active:scale-[.98] disabled:opacity-40 disabled:pointer-events-none;
+  }
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+  .btn-accent {
+    @apply bg-accent text-white hover:bg-accent-dark;
+  }
+  .btn-ghost {
+    @apply bg-transparent text-ink border border-line hover:bg-black/5;
+  }
+  .field {
+    @apply w-full rounded-xl bg-card border border-line px-3.5 py-2.5 text-sm placeholder:text-muted/70 focus:outline-none focus:border-ink;
+  }
+  .pill {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+  }
+}

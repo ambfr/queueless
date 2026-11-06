@@ -32,6 +32,19 @@ def list_businesses():
     res = g.db.table("businesses").select("*").order("created_at", desc=True).execute()
     return jsonify(res.data), 200
 
+@bp.get("/mine")
+@auth_required
+def my_businesses():
+    owned = g.db.table("businesses").select("*").eq("owner_id", g.user.id).execute().data
+    staffed = (
+        g.db.table("business_staff")
+        .select("businesses(*)")
+        .eq("user_id", g.user.id)
+        .execute().data
+    )
+    out = [{**b, "my_role": "owner"} for b in owned]
+    out += [{**r["businesses"], "my_role": "staff"} for r in staffed if r.get("businesses")]
+    return jsonify(out), 200
 
 @bp.get("/<business_id>")
 @auth_required

@@ -3,14 +3,21 @@ import { useAuth } from '../AuthContext'
 
 export default function Layout({ children }) {
   const { profile, logout } = useAuth()
+
   return (
-    <div className="min-h-screen bg-slate-900 text-white">
-      <header className="border-b border-slate-800">
-        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="text-xl font-bold">QueueLess</Link>
-          <div className="flex items-center gap-4 text-sm text-slate-400">
-            <span>{profile?.full_name || profile?.email} · {profile?.role}</span>
-            <button onClick={logout} className="hover:text-white">Log out</button>
+    <div className="min-h-screen">
+      <header className="sticky top-0 z-10 backdrop-blur bg-paper/80 border-b border-line">
+        <div className="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2">
+            <span className="grid place-items-center size-8 rounded-lg bg-accent text-white font-display font-extrabold">Q</span>
+            <span className="font-display font-extrabold text-xl tracking-tight">QueueLess</span>
+          </Link>
+          <div className="flex items-center gap-3">
+            <div className="text-right leading-tight hidden sm:block">
+              <p className="text-sm font-semibold">{profile?.full_name || profile?.email}</p>
+              <p className="text-xs text-muted capitalize">{profile?.role?.replace('_', ' ')}</p>
+            </div>
+            <button onClick={logout} className="btn btn-ghost btn-sm">Log out</button>
           </div>
         </div>
       </header>
