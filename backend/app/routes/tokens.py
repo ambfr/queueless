@@ -1,7 +1,7 @@
 from datetime import datetime, timezone, timedelta
 from flask import Blueprint, request, jsonify, g
 from ..auth import auth_required
-
+from ..estimates import with_estimate
 bp = Blueprint("tokens", __name__)
 
 IST = timezone(timedelta(hours=5, minutes=30))
@@ -10,21 +10,23 @@ ACTIVE = ["waiting", "called", "serving"]
 def service_context(service_id):
     sv = (
         g.db.table("services")
-        .select("id, name, avg_service_minutes, is_open, branches(name, business_id, businesses(name))")
+        .select("id, name, avg_service_minutes, learned_minutes, sample_count, is_open, "
+                "branches(name, business_id, businesses(name))")
         .eq("id", service_id).single().execute().data
     )
     br = sv.get("branches") or {}
     biz = br.get("businesses") or {}
-    return {
+    return with_estimate({
         "id": sv["id"],
         "service_name": sv["name"],
         "avg_service_minutes": sv["avg_service_minutes"],
+        "learned_minutes": sv["learned_minutes"],
+        "sample_count": sv["sample_count"],
         "is_open": sv["is_open"],
         "branch_name": br.get("name"),
         "business_id": br.get("business_id"),
         "business_name": biz.get("name"),
-    }
-
+    })
 
 def flatten_token(row):
     sv = row.pop("services", None) or {}

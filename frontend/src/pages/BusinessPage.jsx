@@ -42,7 +42,14 @@ function ServiceRow({ service, isOwner, canManage, canJoin, onChanged }) {
             {service.name}
             {!service.is_open && <span className="pill bg-red-100 text-red-700 ml-2">Closed</span>}
           </p>
-          <p className="text-xs text-muted mt-1">~{service.avg_service_minutes} min per person</p>
+                    <p className="text-xs text-muted mt-1">
+            ~{service.effective_minutes} min per person
+            {service.estimate_basis !== 'owner' && (
+              <span className="pill bg-emerald-100 text-emerald-800 ml-2">
+                {service.estimate_basis === 'learned' ? 'live estimate' : 'learning'}
+              </span>
+            )}
+          </p>
         </div>
         <div className="flex items-center gap-2">
           {canManage && <Link to={`/manage/${service.id}`} className="btn btn-ghost btn-sm">Manage</Link>}

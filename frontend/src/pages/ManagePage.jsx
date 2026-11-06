@@ -12,17 +12,18 @@ export default function ManagePage() {
   const [q, setQ] = useState(null)
   const [error, setError] = useState('')
 
-  async function load() {
-    const [t, s] = await Promise.all([
+ async function load() {
+    const [t, s, c] = await Promise.all([
       api(`/services/${serviceId}/tokens`),
       api(`/services/${serviceId}/queue`),
+      api(`/services/${serviceId}`),
     ])
     setTokens(t)
     setQ(s)
+    setCtx(c)
   }
 
   useEffect(() => {
-    api(`/services/${serviceId}`).then(setCtx).catch(() => {})
     load().catch((e) => setError(e.message))
   }, [serviceId])
 
@@ -51,6 +52,20 @@ export default function ManagePage() {
         {ctx ? ctx.service_name : 'Queue control'}
       </h1>
       {ctx && <p className="text-muted mt-1">{ctx.business_name} · {ctx.branch_name}</p>}
+
+      {ctx && (
+        <div className="card p-4 mt-6 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-widest text-muted font-semibold">Avg service time</p>
+            <p className="font-mono font-bold text-2xl mt-1">{ctx.effective_minutes} min</p>
+          </div>
+          <p className="text-muted text-right text-xs max-w-[55%]">
+            {ctx.sample_count > 0
+              ? `Learned from ${ctx.sample_count} recent visits (you set ${ctx.avg_service_minutes} min)`
+              : `Using your ${ctx.avg_service_minutes} min estimate until visits are completed`}
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-4 mt-6">
         <div className="rounded-2xl bg-ink text-paper p-6 text-center">

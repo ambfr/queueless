@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, g
 from ..auth import auth_required
-
+from ..estimates import with_estimate
 bp = Blueprint("catalog", __name__)
 
 
@@ -76,7 +76,7 @@ def list_services(branch_id):
         g.db.table("services").select("*")
         .eq("branch_id", branch_id).order("created_at").execute()
     )
-    return jsonify(res.data), 200
+    return jsonify([with_estimate(s) for s in res.data]), 200
 
 
 @bp.post("/branches/<branch_id>/services")

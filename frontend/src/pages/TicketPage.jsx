@@ -93,15 +93,29 @@ export default function TicketPage() {
 
         <div className="p-6 space-y-6">
           {info.status === 'waiting' && (
-            <div className="grid grid-cols-2 gap-4 text-center">
-              <div>
-                <p className="font-mono font-bold text-4xl">{info.people_ahead}</p>
-                <p className="text-xs text-muted mt-1">people ahead</p>
+            <div>
+              <div className="grid grid-cols-2 gap-4 text-center">
+                <div>
+                  <p className="font-mono font-bold text-4xl">{info.people_ahead}</p>
+                  <p className="text-xs text-muted mt-1">people ahead</p>
+                </div>
+                <div>
+                  <p className="font-mono font-bold text-4xl">
+                    {info.people_ahead === 0 ? 'Next!' : info.estimated_wait_minutes}
+                  </p>
+                  <p className="text-xs text-muted mt-1">
+                    {info.people_ahead === 0 ? "you're up soon" : 'min estimated wait'}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="font-mono font-bold text-4xl">{info.estimated_wait_minutes}</p>
-                <p className="text-xs text-muted mt-1">min estimated wait</p>
-              </div>
+              <p className="text-xs text-muted text-center mt-4">
+                ~{info.minutes_per_person} min per person ·{' '}
+                {info.confidence === 'learned'
+                  ? `based on the last ${info.samples} visits`
+                  : info.confidence === 'learning'
+                  ? `learning from ${info.samples} visits so far`
+                  : "business's own estimate"}
+              </p>
             </div>
           )}
 
