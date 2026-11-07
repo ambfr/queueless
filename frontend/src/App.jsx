@@ -1,17 +1,24 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AuthProvider, useAuth } from './AuthContext'
 import AuthPage from './pages/AuthPage'
 import Home from './pages/Home'
 import BusinessPage from './pages/BusinessPage'
 import TicketPage from './pages/TicketPage'
 import ManagePage from './pages/ManagePage'
+import JoinPage from './pages/JoinPage'
+import BusinessJoinPage from './pages/BusinessJoinPage'
 
 function Protected({ children }) {
   const { profile, loading } = useAuth()
+  const location = useLocation()
+
   if (loading) {
-    return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-slate-400">Loading...</div>
+    return <div className="min-h-screen grid place-items-center text-muted">Loading...</div>
   }
-  return profile ? children : <Navigate to="/auth" replace />
+  if (!profile) {
+    return <Navigate to={`/auth?next=${encodeURIComponent(location.pathname)}`} replace />
+  }
+  return children
 }
 
 export default function App() {
@@ -22,6 +29,8 @@ export default function App() {
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/" element={<Protected><Home /></Protected>} />
           <Route path="/b/:id" element={<Protected><BusinessPage /></Protected>} />
+          <Route path="/q/:id" element={<Protected><BusinessJoinPage /></Protected>} />
+          <Route path="/join/:serviceId" element={<Protected><JoinPage /></Protected>} />
           <Route path="/ticket/:id" element={<Protected><TicketPage /></Protected>} />
           <Route path="/manage/:serviceId" element={<Protected><ManagePage /></Protected>} />
           <Route path="*" element={<Navigate to="/" replace />} />

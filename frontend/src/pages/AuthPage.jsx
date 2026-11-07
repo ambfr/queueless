@@ -1,10 +1,14 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../AuthContext'
 
 export default function AuthPage() {
   const { login, register } = useAuth()
   const navigate = useNavigate()
+  const [params] = useSearchParams()
+  const next = params.get('next')
+  const safeNext = next && next.startsWith('/') && !next.startsWith('//') ? next : '/'
+
   const [mode, setMode] = useState('login')
   const [form, setForm] = useState({ full_name: '', email: '', password: '' })
   const [error, setError] = useState('')
@@ -19,7 +23,7 @@ export default function AuthPage() {
     try {
       if (mode === 'login') await login(form.email, form.password)
       else await register(form.full_name, form.email, form.password)
-      navigate('/')
+      navigate(safeNext, { replace: true })
     } catch (err) {
       setError(err.message)
     } finally {
