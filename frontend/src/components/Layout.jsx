@@ -13,10 +13,12 @@ export default function Layout({ children }) {
             <span className="font-display font-extrabold text-xl tracking-tight">QueueLess</span>
           </Link>
           <div className="flex items-center gap-3">
-            <div className="text-right leading-tight hidden sm:block">
-              <p className="text-sm font-semibold">{profile?.full_name || profile?.email}</p>
-              <p className="text-xs text-muted capitalize">{profile?.role?.replace('_', ' ')}</p>
-            </div>
+            <Link to="/account" className="text-right leading-tight hover:opacity-70 transition">
+              <p className="text-sm font-semibold max-w-32 sm:max-w-none truncate">
+                {profile?.full_name || profile?.email}
+              </p>
+              <p className="text-xs text-muted capitalize hidden sm:block">{profile?.role?.replace('_', ' ')}</p>
+            </Link>
             <button onClick={logout} className="btn btn-ghost btn-sm">Log out</button>
           </div>
         </div>

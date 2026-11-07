@@ -68,3 +68,25 @@ def me():
     except Exception as e:
         return jsonify(error="Profile not found"), 404
     return jsonify({"email": g.user.email, **profile.data}), 200
+
+@bp.patch("/me")
+@auth_required
+def update_me():
+    name = ((request.get_json(silent=True) or {}).get("full_name") or "").strip()
+    if not 2 <= len(name) <= 60:
+        return jsonify(error="Name must be 2 to 60 characters"), 400
+    try:
+        g.db.table("profiles").update({"full_name": name}).eq("id", g.user.id).execute()
+    except Exception as e:
+        return jsonify(error=getattr(e, "message", None) or str(e)), 400
+    return jsonify(message="Profile updated"), 200
+
+
+@bp.delete("/me")
+@auth_required
+def delete_me():
+    try:
+        g.db.rpc("delete_my_account", {}).execute()
+    except Exception as e:
+        return jsonify(error=getattr(e, "message", None) or str(e)), 400
+    return jsonify(message="Account deleted"), 200

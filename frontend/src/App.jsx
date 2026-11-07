@@ -7,6 +7,7 @@ import TicketPage from './pages/TicketPage'
 import ManagePage from './pages/ManagePage'
 import JoinPage from './pages/JoinPage'
 import BusinessJoinPage from './pages/BusinessJoinPage'
+import AccountPage from './pages/AccountPage'
 
 function Protected({ children }) {
   const { profile, loading } = useAuth()
@@ -33,6 +34,7 @@ export default function App() {
           <Route path="/join/:serviceId" element={<Protected><JoinPage /></Protected>} />
           <Route path="/ticket/:id" element={<Protected><TicketPage /></Protected>} />
           <Route path="/manage/:serviceId" element={<Protected><ManagePage /></Protected>} />
+          <Route path="/account" element={<Protected><AccountPage /></Protected>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>

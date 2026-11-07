@@ -102,3 +102,12 @@ def remove_staff(business_id, user_id):
     except Exception as e:
         return err(e)
     return jsonify(message="Staff removed"), 200
+
+@bp.delete("/<business_id>")
+@auth_required
+def delete_business(business_id):
+    try:
+        g.db.rpc("delete_business", {"p_business": business_id}).execute()
+    except Exception as e:
+        return err(e)
+    return jsonify(message="Business deleted"), 200

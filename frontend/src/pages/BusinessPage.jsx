@@ -6,6 +6,7 @@ import { useLive } from '../lib/useLive'
 import Layout from '../components/Layout'
 import QRCard from '../components/QRCard'
 import StaffPanel from '../components/StaffPanel'
+import BusinessSettings from '../components/BusinessSettings'
 function ServiceRow({ service, isOwner, canManage, canJoin, onChanged }) {
   const navigate = useNavigate()
   const [q, setQ] = useState(null)
@@ -201,6 +202,7 @@ export default function BusinessPage() {
       )}
       {isOwner && <StaffPanel businessId={business.id} />}
       {canManage && <QRCard businessId={business.id} name={business.name} />}
+      {isOwner && <BusinessSettings key={business.id} business={business} onSaved={load} />}
     </Layout>
   )
 }
