@@ -5,6 +5,7 @@ import { useAuth } from '../AuthContext'
 import { useLive } from '../lib/useLive'
 import Layout from '../components/Layout'
 import QRCard from '../components/QRCard'
+import StaffPanel from '../components/StaffPanel'
 function ServiceRow({ service, isOwner, canManage, canJoin, onChanged }) {
   const navigate = useNavigate()
   const [q, setQ] = useState(null)
@@ -198,6 +199,7 @@ export default function BusinessPage() {
           <button className="btn">Add branch</button>
         </form>
       )}
+      {isOwner && <StaffPanel businessId={business.id} />}
       {canManage && <QRCard businessId={business.id} name={business.name} />}
     </Layout>
   )
