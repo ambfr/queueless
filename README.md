@@ -34,7 +34,7 @@ The ticket page updates live over Supabase Realtime, with no refreshing.
 
 ### Staff
 
-| Staff home | Queue control | Customer called |
+| Staff home | Manage Staff | Customer called |
 | :---: | :---: | :---: |
 | <img src="screenshots/staff_home.png" width="260"> | <img src="screenshots/staff_manage.png" width="260"> | <img src="screenshots/que_called.png" width="260"> |
 
