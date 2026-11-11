@@ -78,7 +78,22 @@ function ServiceRow({ service, isOwner, canManage, canJoin, onChanged }) {
     </div>
   )
 }
+function ShareLink({ businessId }) {
+  const [copied, setCopied] = useState(false)
+  const url = `${window.location.origin}/q/${businessId}`
 
+  async function copy() {
+    await navigator.clipboard.writeText(url)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }
+
+  return (
+    <button onClick={copy} className="btn btn-ghost btn-sm mt-3">
+      {copied ? 'Link copied!' : 'Copy join link'}
+    </button>
+  )
+}
 export default function BusinessPage() {
   const { id } = useParams()
   const { profile } = useAuth()
@@ -150,6 +165,7 @@ export default function BusinessPage() {
       <Link to="/" className="text-sm text-muted hover:text-ink">← All businesses</Link>
       <h1 className="font-display font-extrabold text-4xl tracking-tight mt-2">{business.name}</h1>
       {business.description && <p className="text-muted mt-1">{business.description}</p>}
+      {!canManage && <ShareLink businessId={business.id} />}
       {error && <p className="text-red-600 text-sm mt-3">{error}</p>}
 
       <div className="mt-8 space-y-8">
