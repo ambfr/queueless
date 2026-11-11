@@ -4,7 +4,7 @@
 
 A virtual queue management platform. Customers scan a QR code, pick a service and get a live digital token. Businesses run their queues from a simple dashboard, and wait-time estimates get smarter with every completed visit.
 
-> **Live demo:** _coming soon_
+> **Live demo:**https://queueless-swart-xi.vercel.app/
 
 ---
 
