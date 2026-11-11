@@ -1,9 +1,10 @@
+import os
 import random
 import time
 
 import httpx
 
-API = "http://localhost:5000/api"
+API = os.getenv("API_URL", "http://localhost:5000/api")
 PASSWORD = "test1234"
 http = httpx.Client(timeout=30)
 
