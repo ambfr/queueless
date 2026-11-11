@@ -4,8 +4,19 @@
 
 A virtual queue management platform. Customers scan a QR code, pick a service and get a live digital token. Businesses run their queues from a simple dashboard, and wait-time estimates get smarter with every completed visit.
 
-> **Live demo:**https://queueless-swart-xi.vercel.app/
+> **Live demo:** [queueless-swart-xi.vercel.app](https://queueless-swart-xi.vercel.app)
+>
+> The backend runs on a free tier, so the first request after a quiet period can take about 30 seconds to wake up.
 
+**Try it** (password for all demo accounts: `test1234`)
+
+| Role | Email |
+| --- | --- |
+| Customer | `tara@example.com` |
+| Staff | `neha.staff@example.com` |
+| Owner | `riya.salon@example.com` |
+
+Tip: open the owner in one window and the customer in an incognito window, join a queue as the customer, then press **Call next** as the owner to watch the ticket update live.
 ---
 
 ## Screenshots
